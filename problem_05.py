@@ -4,6 +4,7 @@ import numpy as np
 data_path = "data/problem_05.txt"
 # data_path = "data/problem_05_test.txt"
 
+EMPTY = ord(" ")
 
 def parse_initial_stacks(file_obj):
     rows = []
@@ -19,7 +20,7 @@ def parse_initial_stacks(file_obj):
             continue
         else:
             # actual relevant line
-            cols = list(line[1::4])
+            cols = [ord(x) for x in line[1::4]]
 
             number_of_cols = max(number_of_cols, len(cols))
             rows.append(cols)
@@ -27,11 +28,10 @@ def parse_initial_stacks(file_obj):
     # right pad with empty values
     for index in range(len(rows)):
         row = rows[index]
-        # rows[index] = row + [-1] * (number_of_cols - len(row))
-        rows[index] = row + [" "] * (number_of_cols - len(row))
+        rows[index] = row + [EMPTY] * (number_of_cols - len(row))
 
     rows = np.array(rows)[::-1].T
-    return np.pad(rows, [(0, 0), (0, 50)], mode="constant", constant_values=" ")
+    return np.pad(rows, [(0, 0), (0, 50)], mode="constant", constant_values=EMPTY)
 
 
 def parse_move(line):
@@ -43,7 +43,7 @@ def parse_move(line):
 
 def print_stacks(stacks):
     for row in stacks:
-        print(" ".join(row.tolist()))
+        print(" ".join(chr(n) for n in row))
 
 
 def move_crate(stacks, stack_heights, move, reverse):
@@ -57,7 +57,7 @@ def move_crate(stacks, stack_heights, move, reverse):
     if reverse:
         crates = crates[::-1]
     stacks[to_index, to_stack_height : to_stack_height + count] = crates
-    stacks[from_index, from_stack_height - count : from_stack_height] = " "
+    stacks[from_index, from_stack_height - count : from_stack_height] = EMPTY
 
     stack_heights[from_index] -= count
     stack_heights[to_index] += count
@@ -66,7 +66,7 @@ def move_crate(stacks, stack_heights, move, reverse):
 def get_answer(reverse):
     with open(data_path, "r") as f:
         stacks = parse_initial_stacks(f)
-        stack_heights = (stacks != " ").sum(axis=1)
+        stack_heights = (stacks != EMPTY).sum(axis=1)
 
         for line in f:
             move = parse_move(line)
@@ -75,7 +75,7 @@ def get_answer(reverse):
 
     top_crates = stacks[range(len(stacks)), stack_heights - 1]
 
-    return "".join(top_crates.tolist())
+    return "".join([chr(n) for n in top_crates])
 
 
 # part 1
