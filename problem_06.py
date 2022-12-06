@@ -144,20 +144,20 @@ def find_the_thingy_v2(buffer):
 
 
 def find_the_thingy_v3(buffer, window_size):
-    # Since we only have 26 values but at least 32 bits in an int,
-    # we can map each value onto a unique bit position.
-    bit_shifted_buffer = 1 << buffer
-    # Bitwise OR all the bits in the sliding window.
-    # Now each unique symbol is encoded in the resulting int.
-    uniqueness_window = np.bitwise_or.reduce(sliding_window_view(bit_shifted_buffer, window_size), axis=1)
+    # Since we only have 26 values but at least 32 bits in an int, we can map each value onto a
+    # unique bit position. Then we can bitwise OR all the bits within a given sliding window.
+    # This orthogonally encodes the presence of each unique symbol in the resulting int.
+    sliding_window = sliding_window_view(1 << buffer, window_size)
+    window_uniqueness = np.bitwise_or.reduce(sliding_window, axis=1)
 
-    # Compute the hamming weight (number of 1 bits) which gives the
-    count = np.zeros_like(uniqueness_window)
+    # Compute the hamming weight (number of 1 bits)
+    count = np.zeros_like(window_uniqueness)
     for i in range(26):  # only need to check the first 26 bit positions
-        mask = uniqueness_window != 0
+        mask = window_uniqueness != 0
         count[mask] += 1
-        uniqueness_window[mask] &= uniqueness_window[mask] - 1
+        window_uniqueness[mask] &= window_uniqueness[mask] - 1
 
+    # Find the first offset with the desired number of 1 bits
     return np.argmax(count == window_size) + window_size
 
 
