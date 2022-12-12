@@ -1,8 +1,8 @@
 from pathlib import Path
 import numpy as np
 
-data_path = "data/problem_1.txt"
-# data_path = "data/problem_1_test.txt"
+data_path = "data/problem_01.txt"
+# data_path = "data/problem_01_test.txt"
 
 
 # part 1
