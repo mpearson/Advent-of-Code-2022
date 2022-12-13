@@ -136,7 +136,7 @@ for move_index, (head_dx, head_dy, distance) in enumerate(moves):
         all_tail_coords.add((x[-1], y[-1]))
 
 tail_trail = np.array(list(all_tail_coords))
-print(tail_trail.shape)
+# print(tail_trail.shape)
 # print_snek(tail_trail[:,0], tail_trail[:,1], show_numbers=False)
 
 

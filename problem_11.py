@@ -9,11 +9,14 @@ data_path = "data/problem_11.txt"
 
 
 class WorryLevel:
-    def __init__(self, raw_value, divisors):
+    def __init__(self, raw_value):
         self.raw_value = raw_value
+        self.moduli = None
+        self.modular_values = None
+
+    def set_divisors(self, divisors):
         self.moduli = divisors
-        self.modular_values = [raw_value % modulus for modulus in self.moduli]
-        self.modular_values = [raw_value] * len(self.moduli)
+        self.modular_values = [self.raw_value % modulus for modulus in self.moduli]
 
     def operate(self, operator, rhs_value):
         for index, modulus in enumerate(self.moduli):
@@ -56,7 +59,7 @@ class WorryLevel:
 @dataclasses.dataclass
 class Monkey:
     monkey_index: int = None
-    items: list[int | WorryLevel] = None
+    items: list[WorryLevel] = None
     operator: str = None
     operation_value: str | int = None
     divisor: int = None
@@ -70,7 +73,8 @@ class Monkey:
         """Replace each value with a WorryLevel instance and populate its modular arithmetic shit."""
         self.monkey_roster = monkey_roster
         divisors = [monkey.divisor for monkey in monkey_roster]
-        self.items = [WorryLevel(raw_value, divisors) for raw_value in self.items]
+        for item in self.items:
+            item.set_divisors(divisors)
 
     def do(self):
         for item in self.items:
@@ -96,7 +100,7 @@ def compute_monkey_business(rounds, enable_xanax=True):
             if line.startswith("Monkey"):
                 monkey = Monkey()
                 monkey.monkey_index = int(line[7:-2])
-                monkey.items = [int(item) for item in next(f)[18:].split(", ")]
+                monkey.items = [WorryLevel(int(item)) for item in next(f)[18:].split(", ")]
                 monkey.operator, monkey.operation_value = next(f)[23:-1].split(" ")
                 if monkey.operation_value == "old":
                     monkey.operation_value = None
