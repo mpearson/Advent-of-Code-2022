@@ -1,3 +1,4 @@
+import sys
 import heapq
 import dataclasses
 from pathlib import Path
@@ -37,7 +38,7 @@ class GraphNode:
 
     # The minimum cost to get to the end from this node.This distance is the sum of all node
     # values along the cheapest path to the end.
-    distance: int = 0
+    distance: int = sys.maxsize
 
     # Whether the node has been discovered. Could use distance but it turns out the int comparison
     # of `distance == sys.maxsize` is significantly slower than using this flag. With the flag, the
@@ -48,28 +49,18 @@ class GraphNode:
 
     def compute_neighbors(self, grid):
         self.neighbors = []
-        # filter out neighbors that ares more than 1 unit higher than us
-
         # south
         if self.y + 1 < grid.shape[0]:
             self.neighbors.append(grid[self.y + 1, self.x])
-            # if neighbor.height <= self.height + 1:
-            #     self.neighbors.append(neighbor)
         # north
         if self.y > 0:
             self.neighbors.append(grid[self.y - 1, self.x])
-            # if neighbor.height <= self.height + 1:
-            #     self.neighbors.append(neighbor)
         # east
         if self.x + 1 < grid.shape[1]:
             self.neighbors.append(grid[self.y, self.x + 1])
-            # if neighbor.height <= self.height + 1:
-            #     self.neighbors.append(neighbor)
         # west
         if self.x > 0:
             self.neighbors.append(grid[self.y, self.x - 1])
-            # if neighbor.height <= self.height + 1:
-            #     self.neighbors.append(neighbor)
 
     def __hash__(self):
         return id(self)
@@ -174,7 +165,7 @@ def find_optimal_path(node_grid, start_node, end_node):
     current_node = start_node
 
     for i in range(10000):
-        current_neighbors = [n for n in current_node.neighbors if n.discovered and n.height - current_node.height <= 1]
+        current_neighbors = [n for n in current_node.neighbors if n.height - current_node.height <= 1]
         current_node = min(current_neighbors, key=lambda node: node.distance)
         path.append(current_node)
         if current_node is end_node:
