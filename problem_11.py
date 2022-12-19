@@ -1,8 +1,6 @@
 import json
 import dataclasses
 from pathlib import Path
-from collections import deque
-import numpy as np
 
 data_path = "data/problem_11.txt"
 # data_path = "data/problem_11_test.txt"
@@ -11,49 +9,31 @@ data_path = "data/problem_11.txt"
 class WorryLevel:
     def __init__(self, raw_value):
         self.raw_value = raw_value
-        self.moduli = None
-        self.modular_values = None
+        self.modulus = None
+        self.value = None
 
-    def set_divisors(self, divisors):
-        self.moduli = divisors
-        self.modular_values = [self.raw_value % modulus for modulus in self.moduli]
+    def set_modulus(self, modulus):
+        self.modulus = modulus
+        self.value = self.raw_value % self.modulus
 
     def operate(self, operator, rhs_value):
-        for index, modulus in enumerate(self.moduli):
-            current_value = self.modular_values[index]
-            if rhs_value is None:
-                modular_rhs_value = current_value
-            else:
-                modular_rhs_value = rhs_value
-            if operator == "+":
-                self.modular_values[index] = (current_value + modular_rhs_value) % modulus
-            elif operator == "*":
-                self.modular_values[index] = (current_value * modular_rhs_value) % modulus
-            else:
-                raise Exception(f"wat: {self.operator}")
-
-    def operate_naive(self, operator, rhs_value):
-        current_value = self.raw_value
         if rhs_value is None:
-            rhs_value = self.raw_value
+            rhs_value = self.value
         if operator == "+":
-            self.raw_value = self.raw_value + rhs_value
+            self.value = (self.value + rhs_value) % self.modulus
         elif operator == "*":
-            self.raw_value = self.raw_value * rhs_value
+            self.value = (self.value * rhs_value) % self.modulus
         elif operator == "/":
-            self.raw_value = self.raw_value // rhs_value
+            self.value = self.value // rhs_value
         else:
             raise Exception(f"wat: {self.operator}")
 
-    def is_divisible(self, divisor_index):
-        return self.modular_values[divisor_index] == 0
-
-    def is_divisible_naive(self, divisor):
-        return self.raw_value % divisor == 0
+    def is_divisible(self, divisor):
+        return self.value % divisor == 0
 
     def apply_xanax(self):
         # well that's one way to reduce "worry levels" right?
-        self.operate_naive("/", 3)
+        self.operate("/", 3)
 
 
 @dataclasses.dataclass
@@ -72,22 +52,19 @@ class Monkey:
     def set_monkeys(self, monkey_roster):
         """Replace each value with a WorryLevel instance and populate its modular arithmetic shit."""
         self.monkey_roster = monkey_roster
-        divisors = [monkey.divisor for monkey in monkey_roster]
+        modulus = 1
+        for monkey in monkey_roster:
+            modulus *= monkey.divisor
         for item in self.items:
-            item.set_divisors(divisors)
+            item.set_modulus(modulus)
 
     def do(self):
         for item in self.items:
             self.item_fondle_count += 1
+            item.operate(self.operator, self.operation_value)
             if self.enable_xanax:
-                item.operate_naive(self.operator, self.operation_value)
                 item.apply_xanax()
-                is_divisible = item.is_divisible_naive(self.divisor)
-            else:
-                item.operate(self.operator, self.operation_value)
-                is_divisible = item.is_divisible(self.monkey_index)
-
-            next_monkey_index = self.monkey_if_true if is_divisible else self.monkey_if_false
+            next_monkey_index = self.monkey_if_true if item.is_divisible(self.divisor) else self.monkey_if_false
             self.monkey_roster[next_monkey_index].items.append(item)
 
         self.items.clear()
