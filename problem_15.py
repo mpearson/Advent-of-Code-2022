@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 
 data_path = "data/problem_15.txt"
-data_path = "data/problem_15_test.txt"
+# data_path = "data/problem_15_test.txt"
 
 
 FILE_REGEX = re.compile(r"Sensor at x=([-\d]+), y=([-\d]+): closest beacon is at x=([-\d]+), y=([-\d]+)")

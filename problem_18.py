@@ -5,16 +5,15 @@ import numpy as np
 data_path = "data/problem_18.txt"
 # data_path = "data/problem_18_test.txt"
 
-indices = np.genfromtxt(data_path, dtype=np.uint8, delimiter=",")
-data_cube = np.zeros(indices.max(axis=0) + 3, dtype=int)  # need some padding so the most extreme surfaces get counted
-data_cube[indices[:, 0] + 1, indices[:, 1] + 1, indices[:, 2] + 1] = 1
+indices = np.genfromtxt(data_path, dtype=np.uint8, delimiter=",") + 1
+data_cube = np.zeros(indices.max(axis=0) + 2, dtype=int)  # need some padding so the most extreme surfaces get counted
+data_cube[indices[:, 0], indices[:, 1], indices[:, 2]] = 1
 
 def get_surface_area(array):
     return sum([np.sum(np.abs(np.diff(array, axis=i))) for i in range(3)])
 
-
 def get_neighbors(coords, shape):
-    # yioeld all non-diagonal neighbors in all dimensions
+    # yield all non-diagonal neighbors in all dimensions
     for axis, dim_size in enumerate(shape):
         neighbor_coords = list(coords)
         if coords[axis] + 1 < dim_size:
@@ -24,7 +23,6 @@ def get_neighbors(coords, shape):
         if coords[axis] > 0:
             neighbor_coords[axis] = coords[axis] - 1
             yield tuple(neighbor_coords)
-
 
 def flood_fill(array, seed_coords, new_value):
     seed_value = array[seed_coords]
@@ -39,7 +37,6 @@ def flood_fill(array, seed_coords, new_value):
                     array[n] = new_value
                     next_open_set.append(n)
         open_set = next_open_set
-
 
 # part 1
 surface_area = get_surface_area(data_cube)
