@@ -1,12 +1,15 @@
 from pathlib import Path
 
-for i in range(13, 26):
+for i in range(22, 26):
     with open(f"problem_{i:02d}.py", "w", newline="\n") as f:
         f.write(f"""from pathlib import Path
 import numpy as np
 
 data_path = "data/problem_{i:02d}.txt"
 # data_path = "data/problem_{i:02d}_test.txt"
+
+
+# data = np.genfromtxt(data_path, dtype=np.int32)
 
 # with open(data_path, "r") as f:
 #     data = f.readlines()
